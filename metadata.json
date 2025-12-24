@@ -1,0 +1,5 @@
+{
+  "name": "UX Ops Health Check",
+  "description": "A retrospective operational maturity audit dashboard for Product Design teams, visualizing critical gaps, operational scores, and North Star benchmarks.",
+  "requestFramePermissions": []
+}
