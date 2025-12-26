@@ -52,12 +52,12 @@ export const PriorityFeed: React.FC = () => {
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
             <span className="flex h-3 w-3 rounded-full bg-amber-500 animate-pulse"></span>
-            FY25 Improvement Roadmap
+            FY26 Improvement Roadmap
           </h2>
           <p className="text-slate-400 text-sm mt-1">Live feed of high-priority initiatives & owners</p>
         </div>
         <div className="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300">
-          {priorities.length} Active Tickets
+          {priorities.length} Active Initiatives
         </div>
       </div>
 
