@@ -1,19 +1,13 @@
+
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auditData } from '../data';
 import { SubFunction } from '../types';
-import { ArrowUpRight, User } from 'lucide-react';
-
-const CHAMPIONS = [
-  "Souporno Mukherjee",
-  "Prakhar Vinyas",
-  "Siddhant Saran"
-];
+import { ArrowUpRight } from 'lucide-react';
 
 // 1. Flatten and filter data to get the "To Improve" list
 const getPriorityItems = () => {
   const items: { sub: SubFunction; groupTitle: string; champion: string }[] = [];
-  let count = 0;
 
   auditData.forEach(group => {
     group.subFunctions.forEach(sub => {
@@ -22,10 +16,9 @@ const getPriorityItems = () => {
         items.push({
           sub,
           groupTitle: group.title,
-          // Deterministic "random" assignment so it doesn't flicker on re-renders
-          champion: CHAMPIONS[count % CHAMPIONS.length] 
+          // Use the actual champion from the data, fallback if missing
+          champion: group.champion || "Unassigned"
         });
-        count++;
       }
     });
   });
@@ -45,11 +38,13 @@ export const PriorityFeed: React.FC = () => {
   }, [priorities.length]);
 
   // We show 3 items at a time: current, next, and the one after
-  const visibleItems = [
-    priorities[index],
-    priorities[(index + 1) % priorities.length],
-    priorities[(index + 2) % priorities.length]
-  ];
+  // Handle edge cases where priorities list might be small
+  const visibleItems = [];
+  if (priorities.length > 0) {
+      for (let i = 0; i < Math.min(3, priorities.length); i++) {
+          visibleItems.push(priorities[(index + i) % priorities.length]);
+      }
+  }
 
   return (
     <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl overflow-hidden relative">
@@ -73,56 +68,60 @@ export const PriorityFeed: React.FC = () => {
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-slate-900 to-transparent z-10 pointer-events-none" />
 
         <div className="flex flex-col gap-3 relative z-0">
-          <AnimatePresence mode='popLayout'>
-            {visibleItems.map((item, i) => {
-              // Create a unique key based on the item ID and the current index to force animation on cycle
-              const uniqueKey = `${item.sub.id}-${index + i}`; 
-              
-              return (
-                <motion.div
-                  key={uniqueKey}
-                  initial={{ opacity: 0, y: 50, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -50, scale: 0.95, transition: { duration: 0.4 } }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  layout
-                  className="bg-slate-800/50 border border-slate-700/50 p-4 rounded-xl flex items-center justify-between group hover:bg-slate-800 transition-colors"
-                >
-                  <div className="flex-1 min-w-0 mr-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded">
-                        {item.groupTitle}
-                      </span>
-                      {item.sub.status === 'Partial' && (
-                        <span className="text-[10px] text-amber-400 font-medium">In Progress</span>
-                      )}
+          {priorities.length === 0 ? (
+             <div className="flex items-center justify-center h-40 text-slate-500 text-sm">No critical items found.</div>
+          ) : (
+            <AnimatePresence mode='popLayout'>
+                {visibleItems.map((item, i) => {
+                // Create a unique key based on the item ID and the current index to force animation on cycle
+                const uniqueKey = `${item.sub.id}-${index + i}`; 
+                
+                return (
+                    <motion.div
+                    key={uniqueKey}
+                    initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -50, scale: 0.95, transition: { duration: 0.4 } }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    layout
+                    className="bg-slate-800/50 border border-slate-700/50 p-4 rounded-xl flex items-center justify-between group hover:bg-slate-800 transition-colors"
+                    >
+                    <div className="flex-1 min-w-0 mr-4">
+                        <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded">
+                            {item.groupTitle}
+                        </span>
+                        {item.sub.status === 'Partial' && (
+                            <span className="text-[10px] text-amber-400 font-medium">In Progress</span>
+                        )}
+                        </div>
+                        <h3 className="text-base font-medium text-slate-100 truncate pr-4">
+                        {item.sub.name}
+                        </h3>
+                        <p className="text-xs text-slate-400 mt-0.5 truncate">
+                        {item.sub.actionItems?.[0] || item.sub.currentProcess || "Process definition required"}
+                        </p>
                     </div>
-                    <h3 className="text-base font-medium text-slate-100 truncate pr-4">
-                      {item.sub.name}
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-0.5 truncate">
-                      {item.sub.actionItems?.[0] || item.sub.currentProcess || "Process definition required"}
-                    </p>
-                  </div>
 
-                  {/* Champion Section */}
-                  <div className="flex flex-col items-end shrink-0 pl-4 border-l border-slate-700/50">
-                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Owner</span>
-                    <div className="flex items-center gap-2">
-                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white border border-slate-600">
-                          {item.champion.split(' ').map(n => n[0]).join('')}
-                       </div>
-                       <span className="text-xs font-medium text-slate-300 hidden sm:block">{item.champion}</span>
+                    {/* Champion Section */}
+                    <div className="flex flex-col items-end shrink-0 pl-4 border-l border-slate-700/50">
+                        <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Owner</span>
+                        <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white border border-slate-600">
+                            {item.champion.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <span className="text-xs font-medium text-slate-300 hidden sm:block">{item.champion}</span>
+                        </div>
                     </div>
-                  </div>
-                  
-                  <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ArrowUpRight size={14} className="text-slate-500" />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+                    
+                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ArrowUpRight size={14} className="text-slate-500" />
+                    </div>
+                    </motion.div>
+                );
+                })}
+            </AnimatePresence>
+          )}
         </div>
       </div>
     </div>

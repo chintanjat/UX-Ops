@@ -1,4 +1,5 @@
-export type ImpactLevel = 'High' | 'Medium' | 'Low';
+
+export type ImpactLevel = 'High' | 'Medium' | 'Low' | 'Unknown';
 export type StatusType = 'Done' | 'Not Done' | 'Partial' | 'Unknown';
 
 export interface SubFunction {
@@ -20,6 +21,8 @@ export interface FunctionGroup {
     description: string;
     examples?: string[]; // "What top teams do"
   };
+  progressUpdate?: string; // "How Have we gotten better on each of those things in the last year"
+  champion?: string;       // "Champion for FY26"
   subFunctions: SubFunction[];
 }
 

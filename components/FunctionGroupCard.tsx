@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, AlertTriangle, CheckCircle2, Circle } from 'lucide-react';
+import { ChevronDown, AlertTriangle, CheckCircle2, Circle, TrendingUp, User } from 'lucide-react';
 import { FunctionGroup } from '../types';
 import { AuditRow } from './AuditRow';
 import { clsx } from 'clsx';
@@ -21,7 +22,6 @@ export const FunctionGroupCard: React.FC<FunctionGroupCardProps> = ({ group, def
   const totalItems = group.subFunctions.length;
   const doneItems = group.subFunctions.filter(i => i.status === 'Done').length;
   const criticalItems = group.subFunctions.filter(i => i.status === 'Not Done' && i.impact === 'High').length;
-  const partialItems = group.subFunctions.filter(i => i.status === 'Partial').length;
   
   const completionPercentage = Math.round((doneItems / totalItems) * 100);
 
@@ -109,8 +109,37 @@ export const FunctionGroupCard: React.FC<FunctionGroupCardProps> = ({ group, def
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
             >
+                {/* Meta Information Section (Progress & Champion) */}
+                <div className="bg-slate-50 border-t border-slate-100 px-5 py-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                   {/* FY24 Progress Update */}
+                   <div className="flex gap-3">
+                      <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                          <TrendingUp size={16} className="text-blue-600" />
+                      </div>
+                      <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">FY24 Progress</p>
+                          <p className="text-sm text-slate-700 leading-relaxed">
+                            {group.progressUpdate || "No updates recorded for last year."}
+                          </p>
+                      </div>
+                   </div>
+
+                   {/* FY26 Champion */}
+                   <div className="flex gap-3 md:justify-end">
+                      <div className="text-left md:text-right order-2 md:order-1">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">FY26 Owner</p>
+                          <div className="flex items-center gap-2 md:justify-end">
+                             <p className="text-sm font-semibold text-slate-900">{group.champion || "Unassigned"}</p>
+                          </div>
+                      </div>
+                      <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 order-1 md:order-2">
+                          <User size={16} className="text-indigo-600" />
+                      </div>
+                   </div>
+                </div>
+
                 {/* Header Labels for Desktop */}
-                <div className="hidden sm:grid grid-cols-12 gap-4 px-5 py-2 bg-slate-50 border-y border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <div className="hidden sm:grid grid-cols-12 gap-4 px-5 py-2 bg-slate-50/50 border-y border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <div className="col-span-5 pl-2">Sub-Function</div>
                   <div className="col-span-2 text-center">Impact</div>
                   <div className="col-span-5">Audit & Action</div>
